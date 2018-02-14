@@ -1,0 +1,120 @@
+=============================> Ecommerce Schema <==============================
+
+A data model for a simple e-commerce application that focuses on a couple of key structures
+contained in typical e-commerce systems. These include users, products, categories, shopping carts 
+and orders.
+
+1) User Schema
+
+  const UserSchema = new Schema({
+  email:  {
+    type: String,
+    required: true,
+    unique: true
+  },
+  name: {
+    type: String
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false
+  },
+  passwordSalt: {
+    type: String,
+    required: true,
+    select: false
+  },
+  active: {
+    type: Boolean,
+    default: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+
+2) Product Schema 
+
+ const ProductSchema = new Schema({
+  sku:          { type: String, required: true },
+  category:     { type: String },
+  subcategory:  {type: [{                    
+                    model:[{
+                        type:String,
+                        colour:[{
+                            name:String,
+                            image:String
+                        }],
+                        size:[{
+                            val:Number,
+                            price:Number
+                        }]
+                    }]
+                }]},
+  slug:         { type: String },
+  images:       { type: [
+    {
+      caption:  { type: String },
+      filename: { type: String }
+    }
+  ] },
+  details:      { type: ProductDetail },
+  price:        { type: Money },
+  active:       { type: Boolean, default: false },
+  created_at:   { type: Date },
+  updated_at:   { type: Date, default: Date.now },
+});
+
+const ProductDetail = new Schema({
+  title:        { type: String, required: true },
+  description:  { type: String },
+  summary:      { type: String, required: true }
+}, {
+  _id: false,
+  strict: false,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true }
+});
+
+
+3) Order Schema
+
+const OrderSchema = new Schema({
+  identifier:   { type: String },
+  user:         { type: ObjectId, ref: 'User' },
+  status:       { type: String, default: 'active' },
+  total:        { type: Money },
+  details:      { type: Mixed },
+  shipping:     { type: Mixed },
+  items:        { type: [
+    {
+      sku:      { type: String },
+      qty:      { type: Number, default: 1},
+      title:    { type: String },
+      price:    { type: Money },
+      product:  { type: ObjectId, ref: 'Product' }
+    }
+  ]},
+  expiresAt:    { type: Date, default: null },
+  updatedAt:    { type: Date, default: Date.now },
+  createdAt:    { type: Date, default: Date.now }
+},  {
+  toObject:     { virtuals: true },
+  toJSON:       { virtuals: true }
+});
+
+
+4) Shipping Schema
+
+var requestSchema = new Schema({
+  productName: { type: String, required: true },
+  productId: { type: String, required: true },
+  description: { type: String, required: true },
+  country: { type: String, index: true },
+  shipping: [shipping],
+  deliveryLoc: { type: String, index: true },
+  price: { type: Number, default: 0 },
+})
